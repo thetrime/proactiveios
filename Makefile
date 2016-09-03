@@ -1,10 +1,10 @@
 # You must specify a profile if you want to deploy to the device
 include developer.profile
-# This should set the variables DEVELOPER_PROFILE and TEAM_MEMBER_ID. Working these out is not trivial unfortunately :(
-
+# This should set the variables DEVELOPER_PROFILE and TEAM_MEMBER_ID. Working these out is not trivial unfortunately.
 # You probably also need a valid provisioning profile. Generating this is a real PITA and the free ones now only last a week
-# This also requires ios-deploy to be installed
-# And you also need to create an ent.plist file to describe the entitlements. I dont know how to specify this in a generic way though.  I have my team-identifier and <team-identifier + "." + BUNDLE_ID, truncated to 29 characters(!?) > as the application-identifier
+# It would be nice if we could create a provisioning profile automatically but Apple does NOT seem keen on that :(
+# Deployment also requires ios-deploy to be installed
+
 # You can test in the simulator without any of that stuff though.
 
 # These are things to configure per-project
@@ -15,6 +15,7 @@ BUNDLE_ID=com.trime.${APP_NAME}
 TARGET=device
 XCODE_BASE=/Applications/Xcode.app/Contents
 
+# Everything below here should be automatic, more or less
 ifeq ($(TARGET),simulator)
 SDKROOT=$(XCODE_BASE)/Developer/Platforms/iPhoneSimulator.platform/Developer/SDKs/iPhoneSimulator.sdk
 SIMULATOR=$(XCODE_BASE)/Developer/Applications/Simulator.app/Contents/MacOS/Simulator
