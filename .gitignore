@@ -1,2 +1,4 @@
 developer.profile
 Entitlements.plist
+*.ipa
+*.app
