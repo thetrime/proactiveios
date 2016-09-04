@@ -12,7 +12,7 @@ DEVICE_TYPE=iPhone 5S
 DISPLAY_NAME=ProactiveTest
 APP_NAME=proactive
 BUNDLE_ID=com.trime.${APP_NAME}
-TARGET=device
+TARGET=simulator
 XCODE_BASE=/Applications/Xcode.app/Contents
 
 # Everything below here should be automatic, more or less
@@ -24,20 +24,23 @@ else
 SDKROOT=$(XCODE_BASE)/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk
 CFLAGS=-arch arm64 -pipe -no-cpp-precomp -isysroot ${SDKROOT} -mios-version-min=6.1 -I${SDKROOT}/usr/include/
 endif
-
-
 FRAMEWORKS=$(SDKROOT)/System/Library/Frameworks/
 
-
-all: ${APP_NAME}.app ${APP_NAME}.app/main ${APP_NAME}.app/Info.plist
+all: ${APP_NAME}.app ${APP_NAME}.app/main ${APP_NAME}.app/Info.plist ${APP_NAME}.app/src/builtin.pl
 
 ${APP_NAME}.app:
 	@mkdir $@
 
-${APP_NAME}.app/main: src/main.m
-	clang $(CFLAGS) -F$(FRAMEWORKS) -o ${APP_NAME}.app/main src/main.m -framework Foundation -framework UIKit
+${APP_NAME}.app/main: ${APP_NAME}.app src/main.m 
+	clang $(CFLAGS) -F$(FRAMEWORKS) -o ${APP_NAME}.app/main src/main.m -framework Foundation -framework UIKit -Iproscript2/src -Iproscript2/lib/gmp-ios/gmp-6.1.1 lib/libproscript.a
 
-${APP_NAME}.app/Info.plist: Makefile
+${APP_NAME}.app/src/builtin.pl: ${APP_NAME}.app/src
+	cp proscript2/src/builtin.pl $@
+
+${APP_NAME}.app/src: ${APP_NAME}.app
+	mkdir -p $@
+
+${APP_NAME}.app/Info.plist: ${APP_NAME}.app Makefile
 	@echo '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n<plist version="1.0">\n<dict>\n	<key>CFBundleDisplayName</key>\n	<string>${DISPLAY_NAME}</string>\n	<key>CFBundleExecutable</key>\n	<string>main</string>\n	<key>CFBundleIdentifier</key>\n	<string>${BUNDLE_ID}</string>\n	<key>CFBundleName</key>\n	<string>${APP_NAME}</string>\n	<key>CFBundleVersion</key>\n	<string>1.0</string>\n	<key>LSRequiresIPhoneOS</key>\n	<true/>\n	<key>UILaunchStoryboardName</key>\n	<string>LaunchScreen</string>        \n	<key>UISupportedInterfaceOrientations</key>\n	<array>\n		<string>UIInterfaceOrientationPortrait</string>\n		<string>UIInterfaceOrientationLandscapeLeft</string>\n		<string>UIInterfaceOrientationLandscapeRight</string>\n	</array>\n</dict>\n</plist>' > $@
 
 Entitlements.plist: Makefile
@@ -59,5 +62,4 @@ ${APP_NAME}.ipa: ${APP_NAME}.app ${APP_NAME}.app/main ${APP_NAME}.app/Info.plist
 	codesign --force --sign "${DEVELOPER_PROFILE}" --entitlements Entitlements.plist ${APP_NAME}.app
 	xcrun -sdk iphoneos PackageApplication  ${APP_NAME}.app -o /tmp/${APP_NAME}.ipa 
 	mv /tmp/${APP_NAME}.ipa $@
-
 
